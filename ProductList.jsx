@@ -6,11 +6,10 @@ import './ProductList.css';
 
 function ProductList() {
   const [showCart, setShowCart] = useState(false);
-  const [addedToCart, setAddedToCart] = useState({});
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
 
-  const totalCartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const plantsArray = [
     {
@@ -31,49 +30,64 @@ function ProductList() {
 
   const handleAddToCart = (plant) => {
     dispatch(addItem(plant));
-    setAddedToCart((prevState) => ({
-      ...prevState,
-      [plant.name]: true,
-    }));
   };
 
-  const handleCartClick = (e) => {
-    e.preventDefault();
-    setShowCart(true);
-  };
-
-  const handleContinueShopping = (e) => {
-    e.preventDefault();
-    setShowCart(false);
+  const isPlantInCart = (plantName) => {
+    return cartItems.some(item => item.name === plantName);
   };
 
   return (
     <div>
-      <nav className="navbar">
-        <h2>Paradise Nursery</h2>
-        <div className="cart-icon" onClick={handleCartClick}>
-          🛒 Cart ({totalCartCount})
+      <div className="navbar" style={{ backgroundColor: '#4CAF50', color: '#fff', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="tag">
+          <div className="luxury">
+            <img src="https://cdn.pixabay.com/photo/2020/08/05/13/12/eco-5465432_1280.png" alt="" style={{ height: '50px' }} />
+            <a href="/" style={{ textDecoration: 'none', color: 'white' }}>
+              <div>
+                <h3 style={{ color: 'white' }}>Paradise Nursery</h3>
+                <i style={{ color: 'white' }}>Where Green Meets Serenity</i>
+              </div>
+            </a>
+          </div>
         </div>
-      </nav>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+          <div><a href="#" onClick={(e) => { e.preventDefault(); setShowCart(false); }} style={{ color: 'white', fontSize: '20px', textDecoration: 'none' }}>Plants</a></div>
+          <div>
+            <a href="#" onClick={(e) => { e.preventDefault(); setShowCart(true); }} style={{ color: 'white', fontSize: '20px', textDecoration: 'none' }}>
+              <h1 className="cart">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68">
+                  <rect width="256" height="256" fill="none"></rect>
+                  <path d="M184,184H69.8L41.9,30.6A8,8,0,0,0,34.1,24H16" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="16"></path>
+                  <circle cx="80" cy="204" r="20" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="16"></circle>
+                  <circle cx="184" cy="204" r="20" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="16"></circle>
+                  <path d="M62.5,144H188.1a8,8,0,0,0,7.8-6.1l16.3-65.2a8,8,0,0,0-7.8-9.9H51.2" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="16"></path>
+                </svg>
+                <span className="cart_quantity_count">{totalQuantity}</span>
+              </h1>
+            </a>
+          </div>
+        </div>
+      </div>
 
       {!showCart ? (
         <div className="product-grid">
           {plantsArray.map((categoryObj, index) => (
-            <div key={index} className="category-section">
-              <h2 className="category-title">{categoryObj.category}</h2>
-              <div className="plant-list">
+            <div key={index}>
+              <h1 className="plant_heading"><div>{categoryObj.category}</div></h1>
+              <div className="product-list">
                 {categoryObj.plants.map((plant, pIndex) => (
-                  <div className="plant-card" key={pIndex}>
-                    <img src={plant.image} alt={plant.name} className="plant-image" />
-                    <h3 className="plant-name">{plant.name}</h3>
-                    <p>{plant.description}</p>
-                    <p className="plant-cost">{plant.cost}</p>
+                  <div className="product-card" key={pIndex}>
+                    <img className="product-image" src={plant.image} alt={plant.name} />
+                    <div className="product-title">{plant.name}</div>
+                    <div className="product-description">{plant.description}</div>
+                    <div className="product-cost">{plant.cost}</div>
                     <button
-                      className="add-to-cart-btn"
+                      className="product-button"
                       onClick={() => handleAddToCart(plant)}
-                      disabled={addedToCart[plant.name]}
+                      disabled={isPlantInCart(plant.name)}
+                      style={{ backgroundColor: isPlantInCart(plant.name) ? '#ccc' : '#4CAF50' }}
                     >
-                      {addedToCart[plant.name] ? "Added to Cart" : "Add to Cart"}
+                      {isPlantInCart(plant.name) ? "Added to Cart" : "Add to Cart"}
                     </button>
                   </div>
                 ))}
@@ -82,7 +96,7 @@ function ProductList() {
           ))}
         </div>
       ) : (
-        <CartItem onContinueShopping={handleContinueShopping} />
+        <CartItem onContinueShopping={(e) => { e.preventDefault(); setShowCart(false); }} />
       )}
     </div>
   );
